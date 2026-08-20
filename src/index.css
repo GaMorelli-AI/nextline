@@ -1,0 +1,207 @@
+@import "tailwindcss";
+
+@theme {
+  /* ---------- Typography ---------- */
+  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-display: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Code", monospace;
+
+  /* ---------- Core palette ---------- */
+  /* Navy scale — background/surfaces. Values below are the DARK theme
+     defaults; the light theme overrides live in the [data-theme="light"]
+     block further down, flipping the elevation direction. */
+  --color-navy-950: #05070d;
+  --color-navy-900: #080b14;
+  --color-navy-850: #0a0e19;
+  --color-navy-800: #0e1420;
+  --color-navy-700: #131b2b;
+  --color-navy-600: #1a2436;
+  --color-navy-500: #232f45;
+  --color-navy-400: #2f3d56;
+
+  /* Bluish grays — text / borders. Also theme-flipped below. */
+  --color-slate-50: #f4f6f9;
+  --color-slate-100: #e6eaf1;
+  --color-slate-200: #ccd4e0;
+  --color-slate-300: #a9b5c9;
+  --color-slate-400: #8794ac;
+  --color-slate-500: #67748c;
+  --color-slate-600: #4d586e;
+  --color-slate-700: #384154;
+
+  /* Generic overlay tint used for subtle borders/hover surfaces
+     (bg-ink/[x], border-ink/[x]) — white on dark, dark on light. */
+  --color-ink: #ffffff;
+
+  /* Fixed dark ink for text/icons sitting on top of the bright brand
+     gradient or accent-filled shapes. Does NOT flip with the theme. */
+  --color-onbrand: #05070d;
+
+  /* Emerald / teal / cyan accent ramp */
+  --color-emerald-400: #34e0a1;
+  --color-emerald-500: #1ecb8b;
+  --color-teal-400: #2dd4c8;
+  --color-teal-500: #17b7ac;
+  --color-cyan-400: #34c9e8;
+  --color-cyan-500: #16a9cf;
+
+  /* Status */
+  --color-status-ok: #2fd48f;
+  --color-status-ok-bg: rgba(47, 212, 143, 0.12);
+  --color-status-warn: #f0b23e;
+  --color-status-warn-bg: rgba(240, 178, 62, 0.12);
+  --color-status-critical: #f0553e;
+  --color-status-critical-bg: rgba(240, 85, 62, 0.12);
+  --color-status-info: #3ea6f0;
+  --color-status-info-bg: rgba(62, 166, 240, 0.12);
+  --color-status-neutral: #8794ac;
+  --color-status-neutral-bg: rgba(135, 148, 172, 0.12);
+
+  /* Radius */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-2xl: 24px;
+
+  /* Shadows */
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.24), 0 8px 24px -8px rgba(0, 0, 0, 0.45);
+  --shadow-elevated: 0 4px 12px rgba(0, 0, 0, 0.3), 0 24px 48px -16px rgba(0, 0, 0, 0.55);
+  --shadow-glow-emerald: 0 0 0 1px rgba(52, 224, 161, 0.25), 0 8px 24px -4px rgba(52, 224, 161, 0.25);
+}
+
+:root {
+  color-scheme: dark;
+}
+
+/* ---------- Light theme overrides ---------- */
+/* Applied when the ThemeProvider sets data-theme="light" on <html>.
+   Elevation direction flips: darkest surface in dark mode (page bg)
+   becomes the lightest in light mode, most-elevated surfaces (dropdowns,
+   hover states) become the brightest/whitest. Text scale flips the same
+   way so contrast pairs (e.g. active-pill bg + active-pill text) stay
+   correct automatically. */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --color-navy-950: #eef1f6;
+  --color-navy-900: #ffffff;
+  --color-navy-850: #ffffff;
+  --color-navy-800: #ffffff;
+  --color-navy-700: #eef1f6;
+  --color-navy-600: #e3e8ef;
+  --color-navy-500: #dbe1ea;
+  --color-navy-400: #ccd4e0;
+
+  --color-slate-50: #0d1420;
+  --color-slate-100: #1b2433;
+  --color-slate-200: #33415a;
+  --color-slate-300: #4d5b74;
+  --color-slate-400: #67748c;
+  --color-slate-500: #7c879c;
+  --color-slate-600: #94a0b3;
+  --color-slate-700: #b7c0cf;
+
+  --color-ink: #0d1420;
+
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 20px -8px rgba(15, 23, 42, 0.12);
+  --shadow-elevated: 0 4px 12px rgba(15, 23, 42, 0.06), 0 24px 48px -16px rgba(15, 23, 42, 0.16);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-navy-950);
+  color: var(--color-slate-100);
+  font-family: var(--font-sans);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* ---------- Reusable utility classes ---------- */
+
+@layer components {
+  .surface-panel {
+    background: linear-gradient(180deg, var(--color-navy-800) 0%, var(--color-navy-850) 100%);
+    border: 1px solid rgba(135, 148, 172, 0.12);
+  }
+
+  .surface-card {
+    background: var(--color-navy-800);
+    border: 1px solid rgba(135, 148, 172, 0.1);
+  }
+
+  .surface-card-hover {
+    transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  .surface-card-hover:hover {
+    border-color: rgba(52, 224, 161, 0.35);
+    box-shadow: var(--shadow-card);
+  }
+
+  .text-gradient-brand {
+    background-image: linear-gradient(90deg, var(--color-emerald-400) 0%, var(--color-teal-400) 55%, var(--color-cyan-400) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .bg-gradient-brand {
+    background-image: linear-gradient(90deg, var(--color-emerald-500) 0%, var(--color-teal-500) 55%, var(--color-cyan-500) 100%);
+  }
+
+  .bg-gradient-brand-soft {
+    background-image: linear-gradient(135deg, rgba(52, 224, 161, 0.16) 0%, rgba(45, 212, 200, 0.12) 55%, rgba(52, 201, 232, 0.1) 100%);
+  }
+
+  .ring-brand-focus {
+    outline: none;
+  }
+  .ring-brand-focus:focus-visible {
+    box-shadow: 0 0 0 2px var(--color-navy-900), 0 0 0 4px rgba(52, 224, 161, 0.5);
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(135, 148, 172, 0.25);
+    border-radius: 8px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: rgba(135, 148, 172, 0.4);
+  }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.28s ease both;
+}

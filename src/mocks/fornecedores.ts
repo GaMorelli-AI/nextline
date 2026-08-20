@@ -1,0 +1,73 @@
+import type { Fornecedor } from "@/types";
+
+export const fornecedores: Fornecedor[] = [
+  {
+    id: "f1",
+    nome: "ENGIX Engenharia",
+    especialidade: "Instalações Elétricas",
+    obrasVinculadas: ["sala-sp", "reforma-crea-rj", "centro-administrativo"],
+    performance: 87,
+    ocorrencias: 2,
+    avaliacao: 4.3,
+    contato: "contato@engix.com.br",
+    cnpj: "12.345.678/0001-90",
+  },
+  {
+    id: "f2",
+    nome: "Climatiza Sul",
+    especialidade: "Climatização e HVAC",
+    obrasVinculadas: ["sala-sp", "centro-administrativo"],
+    performance: 91,
+    ocorrencias: 0,
+    avaliacao: 4.7,
+    contato: "comercial@climatizasul.com.br",
+    cnpj: "23.456.789/0001-11",
+  },
+  {
+    id: "f3",
+    nome: "Marcenaria Fortes",
+    especialidade: "Marcenaria e Mobiliário",
+    obrasVinculadas: ["sala-sp"],
+    performance: 95,
+    ocorrencias: 0,
+    avaliacao: 4.9,
+    contato: "atendimento@marcenariafortes.com.br",
+    cnpj: "34.567.890/0001-22",
+  },
+  {
+    id: "f4",
+    nome: "Restaura Patrimônio",
+    especialidade: "Restauro e Patrimônio Histórico",
+    obrasVinculadas: ["reforma-crea-rj"],
+    performance: 89,
+    ocorrencias: 1,
+    avaliacao: 4.5,
+    contato: "restauro@restaurapatrimonio.com.br",
+    cnpj: "45.678.901/0001-33",
+  },
+  {
+    id: "f5",
+    nome: "Verde Paisagismo",
+    especialidade: "Paisagismo",
+    obrasVinculadas: ["reforma-crea-rj"],
+    performance: 82,
+    ocorrencias: 1,
+    avaliacao: 4.1,
+    contato: "projetos@verdepaisagismo.com.br",
+    cnpj: "56.789.012/0001-44",
+  },
+  {
+    id: "f6",
+    nome: "Estrutural Prime",
+    especialidade: "Estruturas de Concreto",
+    obrasVinculadas: ["centro-administrativo"],
+    performance: 68,
+    ocorrencias: 4,
+    avaliacao: 3.2,
+    contato: "engenharia@estruturalprime.com.br",
+    cnpj: "67.890.123/0001-55",
+  },
+];
+
+export const getFornecedoresByObra = (obraId: string) =>
+  fornecedores.filter((f) => f.obrasVinculadas.includes(obraId));

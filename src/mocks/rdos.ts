@@ -1,0 +1,58 @@
+import type { RDO } from "@/types";
+
+export const rdos: RDO[] = [
+  {
+    id: "rdo-137712126",
+    numero: "137712126",
+    obraId: "sala-sp",
+    data: "26/03/2026",
+    autor: "Geovanna de Sena",
+    clima: "Bom",
+    colaboradores: 9,
+    horasTrabalhadas: 8,
+    status: "concluido",
+    servicosExecutados: "Continuidade da instalação de eletrodutos rígidos no pavimento 2. Início da montagem do piso elevado técnico na ala leste.",
+    ocorrencias: "Atraso na entrega de material para eletrodutos, impactando cronograma da disciplina elétrica.",
+  },
+  {
+    id: "rdo-137711980",
+    numero: "137711980",
+    obraId: "sala-sp",
+    data: "25/03/2026",
+    autor: "Geovanna de Sena",
+    clima: "Nublado",
+    colaboradores: 8,
+    horasTrabalhadas: 8,
+    status: "concluido",
+    servicosExecutados: "Fechamento de contrapiso na ala leste. Testes de estanqueidade em tubulações hidráulicas.",
+    ocorrencias: "Nenhuma ocorrência relevante.",
+  },
+  {
+    id: "rdo-137711742",
+    numero: "137711742",
+    obraId: "sala-sp",
+    data: "24/03/2026",
+    autor: "Rafael Tosta",
+    clima: "Chuva",
+    colaboradores: 6,
+    horasTrabalhadas: 6,
+    status: "concluido",
+    servicosExecutados: "Serviços externos suspensos devido à chuva. Trabalhos internos de marcenaria mantidos.",
+    ocorrencias: "Chuva forte impediu movimentação de materiais no pátio.",
+  },
+  {
+    id: "rdo-137711530",
+    numero: "137711530",
+    obraId: "sala-sp",
+    data: "23/03/2026",
+    autor: "Geovanna de Sena",
+    clima: "Bom",
+    colaboradores: 9,
+    horasTrabalhadas: 8,
+    status: "concluido",
+    servicosExecutados: "Instalação de quadros elétricos secundários. Início dos testes de climatização na sala de servidores.",
+    ocorrencias: "NC-018 aberta referente à divergência na instalação elétrica frente ao projeto executivo.",
+  },
+];
+
+export const getRdosByObra = (obraId: string) => rdos.filter((r) => r.obraId === obraId);
