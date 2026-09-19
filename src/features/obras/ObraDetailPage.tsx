@@ -3,13 +3,15 @@ import { useParams, useSearchParams, Navigate } from "react-router-dom";
 import {
   LayoutDashboard,
   GanttChartSquare,
+  CalendarDays,
   NotebookPen,
   Images,
   ShieldAlert,
-  FileText,
-  Users,
-  FileCheck2,
+  FolderKanban,
+  ShoppingCart,
+  ListChecks,
   BarChart2,
+  History,
 } from "lucide-react";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Badge, statusLabel, statusToTone } from "@/components/ui/Badge";
@@ -20,24 +22,28 @@ import { getObraById } from "@/mocks/obras";
 
 import { VisaoGeralTab } from "@/features/obras/tabs/VisaoGeralTab";
 import { CronogramaTab } from "@/features/obras/tabs/CronogramaTab";
+import { AgendaObraTab } from "@/features/obras/tabs/AgendaObraTab";
 import { DiarioObraTab } from "@/features/obras/tabs/DiarioObraTab";
 import { EvidenciasTab } from "@/features/obras/tabs/EvidenciasTab";
 import { NaoConformidadesTab } from "@/features/obras/tabs/NaoConformidadesTab";
-import { DocumentosObraTab } from "@/features/obras/tabs/DocumentosObraTab";
-import { FornecedoresObraTab } from "@/features/obras/tabs/FornecedoresObraTab";
-import { MedicoesTab } from "@/features/obras/tabs/MedicoesTab";
+import { ProjetosDocumentosObraTab } from "@/features/obras/tabs/ProjetosDocumentosObraTab";
+import { ComprasObraTab } from "@/features/obras/tabs/ComprasObraTab";
+import { PendenciasObraTab } from "@/features/obras/tabs/PendenciasObraTab";
 import { RelatoriosObraTab } from "@/features/obras/tabs/RelatoriosObraTab";
+import { HistoricoObraTab } from "@/features/obras/tabs/HistoricoObraTab";
 
 const tabsConfig = [
   { key: "visao-geral", label: "Visão Geral", icon: <LayoutDashboard className="h-3.5 w-3.5" /> },
   { key: "cronograma", label: "Cronograma", icon: <GanttChartSquare className="h-3.5 w-3.5" /> },
+  { key: "agenda", label: "Agenda", icon: <CalendarDays className="h-3.5 w-3.5" /> },
   { key: "diario-obra", label: "Diário de Obra", icon: <NotebookPen className="h-3.5 w-3.5" /> },
+  { key: "documentos", label: "Projetos e Documentos", icon: <FolderKanban className="h-3.5 w-3.5" /> },
+  { key: "compras", label: "Compras e Fornecedores", icon: <ShoppingCart className="h-3.5 w-3.5" /> },
   { key: "evidencias", label: "Evidências", icon: <Images className="h-3.5 w-3.5" /> },
+  { key: "pendencias", label: "Pendências", icon: <ListChecks className="h-3.5 w-3.5" /> },
   { key: "nao-conformidades", label: "Não Conformidades", icon: <ShieldAlert className="h-3.5 w-3.5" /> },
-  { key: "documentos", label: "Documentos", icon: <FileText className="h-3.5 w-3.5" /> },
-  { key: "fornecedores", label: "Fornecedores", icon: <Users className="h-3.5 w-3.5" /> },
-  { key: "medicoes", label: "Medições", icon: <FileCheck2 className="h-3.5 w-3.5" /> },
   { key: "relatorios", label: "Relatórios", icon: <BarChart2 className="h-3.5 w-3.5" /> },
+  { key: "historico", label: "Histórico", icon: <History className="h-3.5 w-3.5" /> },
 ];
 
 export function ObraDetailPage() {
@@ -99,16 +105,18 @@ export function ObraDetailPage() {
 
       <Tabs tabs={tabsConfig} active={activeTab} onChange={changeTab} />
 
-      <div className="animate-fade-in-up">
+      <div className="animate-fade-in">
         {activeTab === "visao-geral" && <VisaoGeralTab obra={obra} />}
         {activeTab === "cronograma" && <CronogramaTab obra={obra} />}
+        {activeTab === "agenda" && <AgendaObraTab obra={obra} />}
         {activeTab === "diario-obra" && <DiarioObraTab obra={obra} openNovo={searchParams.get("novo") === "1"} />}
+        {activeTab === "documentos" && <ProjetosDocumentosObraTab obra={obra} />}
+        {activeTab === "compras" && <ComprasObraTab obra={obra} />}
         {activeTab === "evidencias" && <EvidenciasTab obra={obra} />}
+        {activeTab === "pendencias" && <PendenciasObraTab obra={obra} />}
         {activeTab === "nao-conformidades" && <NaoConformidadesTab obra={obra} />}
-        {activeTab === "documentos" && <DocumentosObraTab obra={obra} />}
-        {activeTab === "fornecedores" && <FornecedoresObraTab obra={obra} />}
-        {activeTab === "medicoes" && <MedicoesTab obra={obra} />}
         {activeTab === "relatorios" && <RelatoriosObraTab obra={obra} />}
+        {activeTab === "historico" && <HistoricoObraTab obra={obra} />}
       </div>
     </div>
   );

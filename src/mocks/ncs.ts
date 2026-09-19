@@ -103,6 +103,25 @@ export const naoConformidades: NaoConformidade[] = [
     comentarios: [],
     timeline: [{ data: "28/01/2026", evento: "NC criada — prazo vencido" }],
   },
+  {
+    id: "NC-023",
+    obraId: "residencial-jardins",
+    descricao: "Instalação elétrica da cozinha divergente do projeto de automação — pontos de tomada fora do trajeto previsto.",
+    categoria: "Elétrica",
+    responsavel: "ENGIX Engenharia",
+    prazo: "10/09/2026",
+    severidade: "alta",
+    status: "em-tratamento",
+    dataAbertura: "09/09/2026",
+    fotos: 3,
+    comentarios: [
+      { autor: "Fernanda Almeida", data: "09/09/2026", texto: "NC aberta durante vistoria de rotina na cozinha." },
+    ],
+    timeline: [
+      { data: "09/09/2026", evento: "NC criada por Fernanda Almeida" },
+      { data: "09/09/2026", evento: "Responsável notificado — ENGIX Engenharia" },
+    ],
+  },
 ];
 
 export const getNcsByObra = (obraId: string) => naoConformidades.filter((n) => n.obraId === obraId);

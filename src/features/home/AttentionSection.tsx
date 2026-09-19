@@ -1,34 +1,43 @@
 import { useNavigate } from "react-router-dom";
-import { Clock, ShieldAlert, FileCheck2, ArrowRight, Radio } from "lucide-react";
+import { Clock, UserCheck, FileWarning, Truck, ArrowRight, Radio } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 
 const items = [
   {
     icon: Clock,
     tone: "warn" as const,
-    title: "Obra Sala São Paulo",
-    description: "Cronograma com atraso estimado de 6 dias.",
-    detail: "Motivo: Instalação de eletrodutos rígidos pendente.",
-    cta: "Ver ocorrência",
-    href: "/obras/sala-sp?tab=cronograma",
+    title: "Obra Residencial Jardins",
+    description: "Milestone de liberação de marcenaria em risco.",
+    detail: "Impacto projetado: +8 dias.",
+    cta: "Analisar",
+    href: "/cronograma?obra=residencial-jardins",
   },
   {
-    icon: ShieldAlert,
-    tone: "critical" as const,
-    title: "Centro Administrativo",
-    description: "3 não conformidades vencidas.",
-    detail: "Categorias: Segurança, Projeto e Estrutural.",
-    cta: "Analisar NCs",
-    href: "/obras/centro-administrativo?tab=nao-conformidades",
-  },
-  {
-    icon: FileCheck2,
+    icon: UserCheck,
     tone: "info" as const,
-    title: "Contrato 171/2024",
-    description: "Medição aguardando aprovação.",
-    detail: "Valor de R$ 184.720 — parada na etapa Gestor.",
-    cta: "Revisar medição",
-    href: "/obras/sala-sp?tab=medicoes",
+    title: "Apartamento Moema",
+    description: "Cliente está há 5 dias sem aprovar a vidraçaria.",
+    detail: "Aprovação pendente desde 05/09.",
+    cta: "Cobrar aprovação",
+    href: "/obras/apartamento-moema?tab=compras",
+  },
+  {
+    icon: FileWarning,
+    tone: "critical" as const,
+    title: "Casa Alphaville",
+    description: "Liberação da obra expira em 12 dias.",
+    detail: "Documento: Liberação da obra.",
+    cta: "Ver documento",
+    href: "/obras/casa-alphaville?tab=documentos",
+  },
+  {
+    icon: Truck,
+    tone: "warn" as const,
+    title: "Reforma Corporativa",
+    description: "Fornecedor não compareceu à visita prevista hoje.",
+    detail: "Automação SmartHome — ocorrência registrada.",
+    cta: "Ver ocorrência",
+    href: "/obras/reforma-corporativa?tab=agenda",
   },
 ];
 
@@ -46,8 +55,8 @@ export function AttentionSection() {
       <div className="flex items-center justify-between px-5 pt-5">
         <div className="flex items-center gap-2.5">
           <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 pulse-dot" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+            <span className="absolute inline-flex h-full w-full rounded-full bg-brand-blue opacity-75 pulse-dot" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-blue" />
           </span>
           <h3 className="text-[15px] font-semibold text-slate-50">Requer sua atenção</h3>
         </div>
@@ -55,12 +64,12 @@ export function AttentionSection() {
           <Radio className="h-3.5 w-3.5" /> Monitoramento em tempo real
         </span>
       </div>
-      <div className="grid grid-cols-1 gap-3 p-5 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 p-5 md:grid-cols-2 xl:grid-cols-4">
         {items.map((item) => (
           <button
             key={item.title}
             onClick={() => navigate(item.href)}
-            className="group flex flex-col items-start rounded-[var(--radius-md)] border border-ink/10 bg-ink/[0.03] p-4 text-left transition-all hover:border-emerald-400/30 hover:bg-ink/[0.05]"
+            className="group flex flex-col items-start rounded-[var(--radius-md)] border border-ink/10 bg-ink/[0.03] p-4 text-left transition-all hover:border-brand-blue/30 hover:bg-ink/[0.05]"
           >
             <div className={`flex h-9 w-9 items-center justify-center rounded-[var(--radius-sm)] ${toneClasses[item.tone]}`}>
               <item.icon className="h-4.5 w-4.5" />
@@ -68,7 +77,7 @@ export function AttentionSection() {
             <p className="mt-3 text-[13.5px] font-semibold text-slate-100">{item.title}</p>
             <p className="mt-1 text-[12.5px] text-slate-300">{item.description}</p>
             <p className="mt-1 text-[12px] text-slate-500">{item.detail}</p>
-            <span className="mt-3.5 flex items-center gap-1.5 text-[12.5px] font-medium text-emerald-400">
+            <span className="mt-3.5 flex items-center gap-1.5 text-[12.5px] font-medium text-brand-blue">
               {item.cta}
               <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </span>

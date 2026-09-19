@@ -25,12 +25,14 @@ export const chartAxisProps = {
 
 export const tooltipContentStyle = {
   background: "var(--color-navy-600)",
-  border: "1px solid rgba(255,255,255,0.1)",
+  border: "1px solid var(--color-navy-500)",
   borderRadius: "10px",
   fontSize: "12.5px",
   padding: "8px 12px",
   boxShadow: "var(--shadow-elevated)",
 };
 
-export const tooltipLabelStyle = { color: "#a9b5c9", marginBottom: 4, fontWeight: 500 };
-export const tooltipItemStyle = { color: "#f4f6f9" };
+// Uses the theme-flipping text tokens (not fixed hex) so the tooltip stays
+// readable in both dark and light mode — the background above flips too.
+export const tooltipLabelStyle = { color: "var(--color-slate-400)", marginBottom: 4, fontWeight: 500 };
+export const tooltipItemStyle = { color: "var(--color-slate-100)" };

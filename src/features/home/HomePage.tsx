@@ -1,21 +1,14 @@
-import { PageHeader } from "@/components/ui/PageHeader";
-import { ExecutiveStats } from "@/features/home/ExecutiveStats";
-import { ChartsSection } from "@/features/home/ChartsSection";
-import { OperationalMap } from "@/features/home/OperationalMap";
-import { AttentionSection } from "@/features/home/AttentionSection";
+import { useProfile } from "@/context/ProfileContext";
+import { GestorHome } from "@/features/home/GestorHome";
+import { ClienteHome } from "@/features/home/ClienteHome";
+import { FornecedorHome } from "@/features/home/FornecedorHome";
+import { MeuDiaPage } from "@/features/meudia/MeuDiaPage";
 
 export function HomePage() {
-  return (
-    <div className="space-y-6">
-      <PageHeader
-        eyebrow="NextLine · Kingline Engenharia"
-        title="Central de Operações"
-        subtitle="Visão consolidada da operação patrimonial e de engenharia."
-      />
-      <ExecutiveStats />
-      <AttentionSection />
-      <OperationalMap />
-      <ChartsSection />
-    </div>
-  );
+  const { perfil } = useProfile();
+
+  if (perfil === "operacional") return <MeuDiaPage />;
+  if (perfil === "cliente") return <ClienteHome />;
+  if (perfil === "fornecedor") return <FornecedorHome />;
+  return <GestorHome />;
 }

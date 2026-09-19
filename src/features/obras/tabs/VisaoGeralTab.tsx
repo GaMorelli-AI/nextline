@@ -9,10 +9,18 @@ import {
   tooltipItemStyle,
   tooltipLabelStyle,
 } from "@/components/charts/chartTheme";
-import { TrendingUp, DollarSign, CalendarClock, Users, ShieldAlert, ListTodo, FileClock } from "lucide-react";
+import { TrendingUp, DollarSign, CalendarClock, Users, ShieldAlert, ListTodo, FileClock, Hammer, AlertCircle, MapPin } from "lucide-react";
+import { Badge } from "@/components/ui/Badge";
 import type { Obra } from "@/types";
 import { getRdosByObra } from "@/mocks/rdos";
 import { getNcsByObra } from "@/mocks/ncs";
+import { OBRA_DEMO_ID, eventosAgenda, pendencias } from "@/mocks/demoObra";
+
+const agoraNaObra = [
+  { titulo: "Marmoraria", status: "Instalação prevista hoje" },
+  { titulo: "Elétrica", status: "Execução em andamento" },
+  { titulo: "Marcenaria", status: "Produção aguardando aprovação" },
+];
 
 const planejadoRealizado = [
   { semana: "S1", planejado: 8, realizado: 8 },
@@ -35,8 +43,52 @@ export function VisaoGeralTab({ obra }: { obra: Obra }) {
     { hora: "11:05", texto: "Cronograma atualizado" },
   ];
 
+  const isDemo = obra.id === OBRA_DEMO_ID;
+  const requerAtencao = pendencias.filter((p) => p.obraId === obra.id && p.status !== "resolvido");
+  const agendaHoje = eventosAgenda.filter((e) => e.obraId === obra.id && e.data === "10/09/2026");
+
   return (
     <div className="space-y-5">
+      {isDemo && (
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+          <Card>
+            <CardHeader title="Agora na obra" subtitle="O que está em execução neste momento" action={<Hammer className="h-4 w-4 text-slate-500" />} />
+            <CardBody className="space-y-2">
+              {agoraNaObra.map((a) => (
+                <div key={a.titulo} className="rounded-[var(--radius-sm)] border border-ink/10 bg-ink/[0.03] px-3.5 py-2.5">
+                  <p className="text-[12.5px] font-medium text-slate-200">{a.titulo}</p>
+                  <p className="text-[11.5px] text-slate-500">{a.status}</p>
+                </div>
+              ))}
+            </CardBody>
+          </Card>
+
+          <Card>
+            <CardHeader title="Requer atenção" action={<AlertCircle className="h-4 w-4 text-[var(--color-status-warn)]" />} />
+            <CardBody className="space-y-2">
+              {requerAtencao.map((p) => (
+                <div key={p.id} className="flex items-start gap-2 rounded-[var(--radius-sm)] border border-ink/10 bg-ink/[0.03] px-3.5 py-2.5">
+                  <Badge tone="warn">{p.criticidade === "alta" ? "Alta" : "Média"}</Badge>
+                  <p className="text-[12px] text-slate-300">{p.titulo}</p>
+                </div>
+              ))}
+            </CardBody>
+          </Card>
+
+          <Card>
+            <CardHeader title="Agenda de hoje" action={<MapPin className="h-4 w-4 text-slate-500" />} />
+            <CardBody className="space-y-2">
+              {agendaHoje.map((ev) => (
+                <div key={ev.id} className="flex items-center gap-2.5 rounded-[var(--radius-sm)] border border-ink/10 bg-ink/[0.03] px-3.5 py-2.5">
+                  <span className="text-[12px] font-bold text-brand-blue">{ev.horario}</span>
+                  <span className="truncate text-[12px] text-slate-300">{ev.responsavel} · {ev.ambiente}</span>
+                </div>
+              ))}
+            </CardBody>
+          </Card>
+        </div>
+      )}
+
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
         <StatCard label="Progresso físico" value={`${obra.progresso}%`} icon={<TrendingUp className="h-4 w-4" />} tone="brand" />
         <StatCard label="Progresso financeiro" value={`${obra.progressoFinanceiro}%`} icon={<DollarSign className="h-4 w-4" />} />

@@ -1,41 +1,62 @@
 import { NavLink } from "react-router-dom";
 import {
   LayoutGrid,
+  Sun,
   HardHat,
-  Landmark,
-  Boxes,
-  Wrench,
-  FileText,
-  FileSignature,
-  Users,
-  Box,
-  BarChart3,
-  Sparkles,
+  GanttChartSquare,
+  ListChecks,
+  CalendarDays,
+  FolderKanban,
+  ShoppingCart,
+  BarChart2,
   ShieldCheck,
   Settings,
   ChevronsLeft,
   ChevronsRight,
   X,
+  Landmark,
+  Boxes,
+  Wrench,
+  Box,
+  BarChart3,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNextAI } from "@/context/NextAIContext";
+import { useProfile } from "@/context/ProfileContext";
+import { useTheme } from "@/context/ThemeContext";
+import type { Perfil } from "@/types";
 
-const mainNav = [
-  { to: "/", label: "Visão Geral", icon: LayoutGrid, end: true },
-  { to: "/obras", label: "Obras", icon: HardHat },
-  { to: "/patrimonio", label: "Patrimônio", icon: Landmark },
-  { to: "/ativos", label: "Ativos", icon: Boxes },
-  { to: "/facilities", label: "Facilities", icon: Wrench },
-  { to: "/documentos", label: "Documentos", icon: FileText },
-  { to: "/contratos", label: "Contratos", icon: FileSignature },
-  { to: "/fornecedores", label: "Fornecedores", icon: Users },
-  { to: "/bim", label: "BIM", icon: Box },
-  { to: "/analytics", label: "Analytics", icon: BarChart3 },
+interface NavItemDef {
+  to: string;
+  label: string;
+  icon: typeof LayoutGrid;
+  end?: boolean;
+  perfis: Perfil[];
+}
+
+const mainNav: NavItemDef[] = [
+  { to: "/", label: "Visão Geral", icon: LayoutGrid, end: true, perfis: ["gestor", "operacional", "cliente", "fornecedor"] },
+  { to: "/meu-dia", label: "Meu Dia", icon: Sun, perfis: ["gestor", "operacional"] },
+  { to: "/obras", label: "Obras", icon: HardHat, perfis: ["gestor", "operacional"] },
+  { to: "/cronograma", label: "Cronograma", icon: GanttChartSquare, perfis: ["gestor", "operacional", "cliente", "fornecedor"] },
+  { to: "/pendencias", label: "Pendências", icon: ListChecks, perfis: ["gestor", "operacional", "cliente"] },
+  { to: "/agenda", label: "Agenda", icon: CalendarDays, perfis: ["gestor", "operacional", "cliente", "fornecedor"] },
+  { to: "/documentos", label: "Projetos e Documentos", icon: FolderKanban, perfis: ["gestor", "operacional", "cliente", "fornecedor"] },
+  { to: "/compras", label: "Compras e Fornecedores", icon: ShoppingCart, perfis: ["gestor", "operacional", "fornecedor"] },
+  { to: "/relatorios", label: "Relatórios", icon: BarChart2, perfis: ["gestor", "operacional", "cliente"] },
 ];
 
-const adminNav = [
-  { to: "/administracao", label: "Administração", icon: ShieldCheck },
-  { to: "/configuracoes", label: "Configurações", icon: Settings },
+const roadmapNav: NavItemDef[] = [
+  { to: "/patrimonio", label: "Patrimônio", icon: Landmark, perfis: ["gestor"] },
+  { to: "/ativos", label: "Ativos", icon: Boxes, perfis: ["gestor"] },
+  { to: "/facilities", label: "Facilities", icon: Wrench, perfis: ["gestor"] },
+  { to: "/bim", label: "BIM", icon: Box, perfis: ["gestor"] },
+  { to: "/analytics", label: "Analytics", icon: BarChart3, perfis: ["gestor"] },
+];
+
+const adminNav: NavItemDef[] = [
+  { to: "/administracao", label: "Usuários, Perfis e Permissões", icon: ShieldCheck, perfis: ["gestor"] },
+  { to: "/configuracoes", label: "Configurações", icon: Settings, perfis: ["gestor"] },
 ];
 
 export function Sidebar({
@@ -50,6 +71,12 @@ export function Sidebar({
   onCloseMobile?: () => void;
 }) {
   const { openPanel } = useNextAI();
+  const { perfil } = useProfile();
+  const { theme } = useTheme();
+
+  const visibleMain = mainNav.filter((i) => i.perfis.includes(perfil));
+  const visibleRoadmap = roadmapNav.filter((i) => i.perfis.includes(perfil));
+  const visibleAdmin = adminNav.filter((i) => i.perfis.includes(perfil));
 
   return (
     <aside
@@ -63,22 +90,14 @@ export function Sidebar({
       {/* Logo */}
       <div className={cn("flex h-16 items-center justify-between border-b border-ink/[0.06] px-5", collapsed && "md:justify-center md:px-0")}>
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-onbrand">
-            <svg viewBox="0 0 32 32" className="h-5 w-5">
-              <path d="M8 7 L15 16 L8 25 L12.5 25 L19.5 16 L12.5 7 Z" fill="#e6eaf1" />
-              <path d="M16 7 L23 16 L16 25 L20.5 25 L27.5 16 L20.5 7 Z" fill="url(#sidebar-grad)" />
-              <defs>
-                <linearGradient id="sidebar-grad" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#34e0a1" />
-                  <stop offset="55%" stopColor="#2dd4c8" />
-                  <stop offset="100%" stopColor="#34c9e8" />
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
-          <span className={cn("text-[15px] font-semibold tracking-tight text-slate-50", collapsed && "md:hidden")}>
-            NEXT<span className="text-gradient-brand">LINE</span>
-          </span>
+          <img src="/brand/nextline-mark.png" alt="NextLine" className="h-8 w-8 shrink-0 rounded-[8px]" />
+          {!collapsed && (
+            <img
+              src={theme === "dark" ? "/brand/nextline-wordmark-dark.png" : "/brand/nextline-wordmark-light.png"}
+              alt="NextLine"
+              className="h-[18px] w-auto"
+            />
+          )}
         </div>
         <button
           onClick={onCloseMobile}
@@ -91,7 +110,7 @@ export function Sidebar({
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto scrollbar-thin px-3 py-4">
         <ul className="space-y-0.5">
-          {mainNav.map((item) => (
+          {visibleMain.map((item) => (
             <NavItem key={item.to} {...item} collapsed={collapsed} onNavigate={onCloseMobile} />
           ))}
         </ul>
@@ -105,17 +124,36 @@ export function Sidebar({
             collapsed && "md:justify-center md:px-0"
           )}
         >
-          <Sparkles className="h-[18px] w-[18px] shrink-0 text-emerald-400" />
+          <img src="/brand/nextline-symbol.png" alt="" className="h-[18px] w-[18px] shrink-0 object-contain" />
           <span className={cn("text-gradient-brand font-semibold", collapsed && "md:hidden")}>Next AI</span>
         </button>
 
-        <div className="my-3 h-px bg-ink/[0.07]" />
+        {visibleRoadmap.length > 0 && (
+          <>
+            <div className="my-3 h-px bg-ink/[0.07]" />
+            {!collapsed && (
+              <p className="px-3 pb-1.5 text-[10.5px] font-semibold uppercase tracking-wider text-slate-600">
+                Roadmap · Em breve
+              </p>
+            )}
+            <ul className="space-y-0.5 opacity-60">
+              {visibleRoadmap.map((item) => (
+                <NavItem key={item.to} {...item} collapsed={collapsed} onNavigate={onCloseMobile} muted />
+              ))}
+            </ul>
+          </>
+        )}
 
-        <ul className="space-y-0.5">
-          {adminNav.map((item) => (
-            <NavItem key={item.to} {...item} collapsed={collapsed} onNavigate={onCloseMobile} />
-          ))}
-        </ul>
+        {visibleAdmin.length > 0 && (
+          <>
+            <div className="my-3 h-px bg-ink/[0.07]" />
+            <ul className="space-y-0.5">
+              {visibleAdmin.map((item) => (
+                <NavItem key={item.to} {...item} collapsed={collapsed} onNavigate={onCloseMobile} />
+              ))}
+            </ul>
+          </>
+        )}
       </nav>
 
       {/* Collapse toggle */}
@@ -142,14 +180,8 @@ function NavItem({
   end,
   collapsed,
   onNavigate,
-}: {
-  to: string;
-  label: string;
-  icon: typeof LayoutGrid;
-  end?: boolean;
-  collapsed: boolean;
-  onNavigate?: () => void;
-}) {
+  muted = false,
+}: NavItemDef & { collapsed: boolean; onNavigate?: () => void; muted?: boolean }) {
   return (
     <li>
       <NavLink
@@ -160,7 +192,7 @@ function NavItem({
           cn(
             "group relative flex items-center gap-3 rounded-[var(--radius-sm)] px-3 py-2.5 text-[13.5px] font-medium transition-colors",
             collapsed && "md:justify-center md:px-0",
-            isActive
+            isActive && !muted
               ? "bg-gradient-brand-soft text-slate-50"
               : "text-slate-400 hover:bg-ink/[0.05] hover:text-slate-200"
           )
@@ -169,9 +201,9 @@ function NavItem({
       >
         {({ isActive }) => (
           <>
-            {isActive && <span className="absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-r-full bg-gradient-brand" />}
-            <Icon className={cn("h-[18px] w-[18px] shrink-0", isActive && "text-emerald-400")} />
-            <span className={cn(collapsed && "md:hidden")}>{label}</span>
+            {isActive && !muted && <span className="absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-r-full bg-brand-blue" />}
+            <Icon className={cn("h-[18px] w-[18px] shrink-0", isActive && !muted && "text-brand-blue")} />
+            <span className={cn("truncate", collapsed && "md:hidden")}>{label}</span>
           </>
         )}
       </NavLink>

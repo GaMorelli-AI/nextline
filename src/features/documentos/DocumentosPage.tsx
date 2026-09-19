@@ -20,9 +20,9 @@ export function DocumentosPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Ecossistema NextLine"
-        title="Documentos"
-        subtitle="Gerenciador documental centralizado com versionamento e rastreabilidade."
+        eyebrow="Projetos e Documentos"
+        title="Central de Documentos"
+        subtitle="Gerenciador documental centralizado com versionamento e rastreabilidade entre todas as obras."
         actions={
           <Button variant="primary" icon={<Plus className="h-4 w-4" />}>
             Novo Documento

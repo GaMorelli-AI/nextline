@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Plus, Bell, HelpCircle, ChevronDown, LogOut, User, Settings, Building2, Menu, Sun, Moon } from "lucide-react";
+import { Search, Plus, Bell, HelpCircle, ChevronDown, LogOut, User, Settings, Menu, Sun, Moon, UserCircle2, Check } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Avatar } from "@/components/ui/Avatar";
 import { Dropdown, DropdownItem, DropdownSeparator } from "@/components/ui/Dropdown";
@@ -7,15 +8,21 @@ import { Button } from "@/components/ui/Button";
 import { notificacoes } from "@/mocks/notificacoes";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/context/ThemeContext";
+import { useProfile, labelPerfil } from "@/context/ProfileContext";
+import { AjudaModal } from "@/features/ajuda/AjudaModal";
+import type { Perfil } from "@/types";
 
-const organizacoes = ["Kingline Engenharia", "New X Soluções", "NextLine Holding"];
+const perfis: Perfil[] = ["gestor", "operacional", "cliente", "fornecedor"];
 
 export function Topbar({ onOpenMobileNav }: { onOpenMobileNav?: () => void }) {
   const navigate = useNavigate();
   const naoLidas = notificacoes.filter((n) => !n.lida).length;
   const { theme, toggleTheme } = useTheme();
+  const { perfil, setPerfil, nome } = useProfile();
+  const [ajudaOpen, setAjudaOpen] = useState(false);
 
   return (
+    <>
     <header className="sticky top-0 z-40 flex h-16 items-center gap-2 border-b border-ink/[0.06] bg-navy-900/80 px-3 backdrop-blur-md sm:gap-4 sm:px-6">
       <button
         onClick={onOpenMobileNav}
@@ -24,27 +31,34 @@ export function Topbar({ onOpenMobileNav }: { onOpenMobileNav?: () => void }) {
         <Menu className="h-5 w-5" />
       </button>
 
-      {/* Org selector */}
+      {/* Seletor de perfil de demonstração */}
       <Dropdown
         trigger={
           <button className="flex items-center gap-2 rounded-[var(--radius-sm)] px-2.5 py-1.5 text-left transition-colors hover:bg-ink/[0.05]">
             <div className="flex h-7 w-7 items-center justify-center rounded-[7px] bg-gradient-brand-soft text-emerald-300">
-              <Building2 className="h-3.5 w-3.5" />
+              <UserCircle2 className="h-3.5 w-3.5" />
             </div>
             <div className="hidden sm:block">
-              <p className="text-[13px] font-semibold leading-tight text-slate-100">Kingline Engenharia</p>
-              <p className="text-[11px] leading-tight text-slate-500">Unidade São Paulo</p>
+              <p className="text-[13px] font-semibold leading-tight text-slate-100">{labelPerfil[perfil]}</p>
+              <p className="text-[11px] leading-tight text-slate-500">Ambiente de demonstração</p>
             </div>
             <ChevronDown className="h-3.5 w-3.5 text-slate-500" />
           </button>
         }
       >
         <p className="px-3.5 pb-1.5 pt-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-          Organizações
+          Ver como
         </p>
-        {organizacoes.map((org) => (
-          <DropdownItem key={org} icon={<Building2 className="h-4 w-4 text-slate-500" />}>
-            {org}
+        {perfis.map((p) => (
+          <DropdownItem
+            key={p}
+            icon={p === perfil ? <Check className="h-4 w-4 text-brand-blue" /> : <UserCircle2 className="h-4 w-4 text-slate-500" />}
+            onClick={() => {
+              setPerfil(p);
+              navigate("/");
+            }}
+          >
+            {labelPerfil[p]}
           </DropdownItem>
         ))}
       </Dropdown>
@@ -66,19 +80,22 @@ export function Topbar({ onOpenMobileNav }: { onOpenMobileNav?: () => void }) {
         <button className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-sm)] text-slate-400 hover:bg-ink/[0.06] hover:text-slate-100 sm:hidden">
           <Search className="h-[18px] w-[18px]" />
         </button>
-        <Dropdown
-          trigger={
-            <Button variant="primary" size="md" icon={<Plus className="h-4 w-4" />} className="px-2.5 sm:px-4">
-              <span className="hidden sm:inline">Novo</span>
-            </Button>
-          }
-        >
-          <DropdownItem onClick={() => navigate("/obras")}>Nova Obra</DropdownItem>
-          <DropdownItem onClick={() => navigate("/obras/sala-sp?tab=diario-obra&novo=1")}>Novo Diário de Obra</DropdownItem>
-          <DropdownItem onClick={() => navigate("/obras/sala-sp?tab=nao-conformidades")}>Nova Não Conformidade</DropdownItem>
-          <DropdownItem onClick={() => navigate("/documentos")}>Novo Documento</DropdownItem>
-          <DropdownItem onClick={() => navigate("/fornecedores")}>Novo Fornecedor</DropdownItem>
-        </Dropdown>
+        {perfil !== "cliente" && perfil !== "fornecedor" && (
+          <Dropdown
+            trigger={
+              <Button variant="primary" size="md" icon={<Plus className="h-4 w-4" />} className="px-2.5 sm:px-4">
+                <span className="hidden sm:inline">Novo</span>
+              </Button>
+            }
+          >
+            <DropdownItem onClick={() => navigate("/obras")}>Nova Obra</DropdownItem>
+            <DropdownItem onClick={() => navigate("/agenda")}>Novo Evento na Agenda</DropdownItem>
+            <DropdownItem onClick={() => navigate("/obras/residencial-jardins?tab=diario-obra&novo=1")}>Novo Diário de Obra</DropdownItem>
+            <DropdownItem onClick={() => navigate("/obras/residencial-jardins?tab=nao-conformidades")}>Nova Não Conformidade</DropdownItem>
+            <DropdownItem onClick={() => navigate("/compras")}>Nova Cotação</DropdownItem>
+            <DropdownItem onClick={() => navigate("/documentos")}>Novo Documento</DropdownItem>
+          </Dropdown>
+        )}
 
         <Dropdown
           align="right"
@@ -127,20 +144,24 @@ export function Topbar({ onOpenMobileNav }: { onOpenMobileNav?: () => void }) {
           {theme === "dark" ? <Sun className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />}
         </button>
 
-        <button className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-sm)] text-slate-400 transition-colors hover:bg-ink/[0.06] hover:text-slate-100">
+        <button
+          onClick={() => setAjudaOpen(true)}
+          title="Ajuda e suporte"
+          className="hidden h-9 w-9 items-center justify-center rounded-[var(--radius-sm)] text-slate-400 transition-colors hover:bg-ink/[0.06] hover:text-slate-100 sm:flex"
+        >
           <HelpCircle className="h-[18px] w-[18px]" />
         </button>
 
-        <div className="h-6 w-px bg-ink/[0.08]" />
+        <div className="hidden h-6 w-px bg-ink/[0.08] sm:block" />
 
         <Dropdown
           align="right"
           trigger={
             <button className="flex items-center gap-2 rounded-[var(--radius-sm)] py-1 pl-1 pr-2 transition-colors hover:bg-ink/[0.05]">
-              <Avatar initials="GM" size="sm" />
+              <Avatar initials={nome.slice(0, 2).toUpperCase()} size="sm" />
               <div className="hidden text-left md:block">
-                <p className="text-[12.5px] font-semibold leading-tight text-slate-100">Gabriel Morelli</p>
-                <p className="text-[11px] leading-tight text-slate-500">Administrador</p>
+                <p className="text-[12.5px] font-semibold leading-tight text-slate-100">{nome}</p>
+                <p className="text-[11px] leading-tight text-slate-500">{labelPerfil[perfil]}</p>
               </div>
             </button>
           }
@@ -159,5 +180,8 @@ export function Topbar({ onOpenMobileNav }: { onOpenMobileNav?: () => void }) {
         </Dropdown>
       </div>
     </header>
+
+    <AjudaModal open={ajudaOpen} onClose={() => setAjudaOpen(false)} />
+    </>
   );
 }

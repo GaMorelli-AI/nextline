@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -26,7 +27,7 @@ export function Modal({
     xl: "max-w-5xl",
   }[size];
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-[2px] animate-fade-in-up"
@@ -50,6 +51,7 @@ export function Modal({
         <div className="overflow-y-auto scrollbar-thin px-6 py-5">{children}</div>
         {footer && <div className="flex items-center justify-end gap-2 border-t border-ink/[0.07] px-6 py-4">{footer}</div>}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
