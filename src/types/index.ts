@@ -24,6 +24,7 @@ export interface Obra {
   diasRestantes: number;
   descricao: string;
   valorContrato: number;
+  bufferDiasCliente?: number;
 }
 
 export interface AtividadeCronograma {
@@ -77,6 +78,13 @@ export interface Evidencia {
   responsavel: string;
   rdo: string;
   thumb: string;
+  fornecedor?: string;
+  item?: string;
+  atividade?: string;
+  status?: string;
+  formato?: "foto" | "360";
+  link360?: string;
+  incluirRelatorio?: boolean;
 }
 
 export interface Fornecedor {
@@ -251,6 +259,7 @@ export interface ProjetoRevisao {
   aprovadoPor?: string;
   status: "aprovado" | "em-revisao" | "substituido";
   observacoes?: string;
+  resumoAlteracoes?: string;
   origem: "nextline" | "integracao-externa";
 }
 
@@ -328,6 +337,13 @@ export interface PedidoFechado {
 export type CategoriaPendencia = "aprovacao" | "documento" | "fornecedor" | "obra" | "projeto";
 export type StatusPendencia = "aberto" | "em-andamento" | "aguardando-terceiro" | "resolvido" | "vencido";
 
+export interface ResolucaoPendencia {
+  observacao: string;
+  fotos: number;
+  resolvidoPor: string;
+  resolvidoEm: string;
+}
+
 export interface Pendencia {
   id: string;
   obraId: string;
@@ -339,6 +355,7 @@ export interface Pendencia {
   criticidade: Severidade;
   status: StatusPendencia;
   ambiente?: string;
+  resolucao?: ResolucaoPendencia;
 }
 
 /* ---------- Checklist de visita (Meu Dia) ---------- */

@@ -1,64 +1,41 @@
-import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { CheckSquare, FileWarning, Truck, HardHat, FolderKanban, Search } from "lucide-react";
+import { useState } from "react";
+import { Search } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Input, Select } from "@/components/ui/Input";
+import { useProfile } from "@/context/ProfileContext";
 import { pendencias } from "@/mocks/demoObra";
 import { getObraById } from "@/mocks/obras";
-import type { CategoriaPendencia, StatusPendencia } from "@/types";
-
-const categoriaIcon: Record<CategoriaPendencia, typeof CheckSquare> = {
-  aprovacao: CheckSquare,
-  documento: FileWarning,
-  fornecedor: Truck,
-  obra: HardHat,
-  projeto: FolderKanban,
-};
-
-const categoriaLabel: Record<CategoriaPendencia, string> = {
-  aprovacao: "Aprovação",
-  documento: "Documento",
-  fornecedor: "Fornecedor",
-  obra: "Obra",
-  projeto: "Projeto",
-};
-
-const statusTone: Record<StatusPendencia, "ok" | "warn" | "critical" | "info" | "neutral"> = {
-  aberto: "critical",
-  "em-andamento": "info",
-  "aguardando-terceiro": "warn",
-  resolvido: "ok",
-  vencido: "critical",
-};
-
-const statusLabelMap: Record<StatusPendencia, string> = {
-  aberto: "Aberto",
-  "em-andamento": "Em andamento",
-  "aguardando-terceiro": "Aguardando terceiro",
-  resolvido: "Resolvido",
-  vencido: "Vencido",
-};
+import { categoriaIcon, categoriaLabel, agora, statusLabel, statusTone } from "@/features/pendencias/pendenciaMaps";
+import { PendenciaDrawer } from "@/features/pendencias/PendenciaDrawer";
+import type { Pendencia } from "@/types";
 
 export function PendenciasPage() {
-  const navigate = useNavigate();
+  const { nome } = useProfile();
   const [categoria, setCategoria] = useState<string>("todas");
   const [status, setStatus] = useState<string>("todas");
   const [search, setSearch] = useState("");
+  const [, forceRender] = useState(0);
+  const [selected, setSelected] = useState<Pendencia | null>(null);
 
-  const filtradas = useMemo(
-    () =>
-      pendencias.filter(
-        (p) =>
-          (categoria === "todas" || p.categoria === categoria) &&
-          (status === "todas" || p.status === status) &&
-          (!search || p.titulo.toLowerCase().includes(search.toLowerCase()))
-      ),
-    [categoria, status, search]
+  const filtradas = pendencias.filter(
+    (p) =>
+      (categoria === "todas" || p.categoria === categoria) &&
+      (status === "todas" || p.status === status) &&
+      (!search || p.titulo.toLowerCase().includes(search.toLowerCase()))
   );
 
   const abertas = pendencias.filter((p) => p.status !== "resolvido").length;
+
+  function resolver(id: string, dados: { observacao: string; fotos: number }) {
+    const alvo = pendencias.find((p) => p.id === id);
+    if (!alvo) return;
+    alvo.status = "resolvido";
+    alvo.resolucao = { observacao: dados.observacao, fotos: dados.fotos, resolvidoPor: nome, resolvidoEm: agora() };
+    setSelected(null);
+    forceRender((n) => n + 1);
+  }
 
   return (
     <div className="space-y-6">
@@ -82,7 +59,7 @@ export function PendenciasPage() {
         </Select>
         <Select value={status} onChange={(e) => setStatus(e.target.value)}>
           <option value="todas">Status: Todos</option>
-          {Object.entries(statusLabelMap).map(([k, v]) => (
+          {Object.entries(statusLabel).map(([k, v]) => (
             <option key={k} value={k}>
               {v}
             </option>
@@ -99,7 +76,7 @@ export function PendenciasPage() {
             <Card
               key={p.id}
               hoverable
-              onClick={() => navigate(`/obras/${p.obraId}?tab=pendencias`)}
+              onClick={() => setSelected(p)}
               className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"
             >
               <div className="flex items-start gap-3">
@@ -118,12 +95,20 @@ export function PendenciasPage() {
                 </div>
               </div>
               <div className="flex shrink-0 items-center gap-2 pl-13 sm:pl-0">
-                <Badge tone={statusTone[p.status]}>{statusLabelMap[p.status]}</Badge>
+                <Badge tone={statusTone[p.status]}>{statusLabel[p.status]}</Badge>
               </div>
             </Card>
           );
         })}
       </div>
+
+      <PendenciaDrawer
+        key={selected?.id ?? "none"}
+        pendencia={selected}
+        obraNome={selected ? getObraById(selected.obraId)?.nome : undefined}
+        onClose={() => setSelected(null)}
+        onResolver={resolver}
+      />
     </div>
   );
 }

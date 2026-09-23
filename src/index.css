@@ -18,37 +18,37 @@
 
   /* Navy scale — background/surfaces. DARK theme defaults below; the light
      theme overrides live in the [data-theme="light"] block further down.
-     Every step is a color-mix() of ONLY the five official palette colors
-     (no invented hexes): Deep Ink is the page canvas, Institutional Navy
-     is the elevated-surface color, and higher elevations (dropdowns,
-     hover, active pills) blend in progressively more Support Lilac —
-     never more saturated blue. That's what keeps NextLine Blue reading
-     as the single accent instead of a second, competing blue. */
-  --color-navy-950: var(--color-brand-ink);
-  --color-navy-900: color-mix(in srgb, var(--color-brand-navy) 55%, var(--color-brand-ink) 45%);
-  --color-navy-850: color-mix(in srgb, var(--color-brand-navy) 78%, var(--color-brand-ink) 22%);
-  --color-navy-800: var(--color-brand-navy);
-  --color-navy-700: color-mix(in srgb, var(--color-brand-navy) 88%, var(--color-brand-lilac) 12%);
-  --color-navy-600: color-mix(in srgb, var(--color-brand-navy) 74%, var(--color-brand-lilac) 26%);
-  --color-navy-500: color-mix(in srgb, var(--color-brand-navy) 60%, var(--color-brand-lilac) 40%);
-  --color-navy-400: color-mix(in srgb, var(--color-brand-navy) 45%, var(--color-brand-lilac) 55%);
+     Conventional neutral dark-UI grays (à la GitHub/Linear/Vercel dark
+     mode) instead of a navy/blue-tinted surface — NextLine Blue is kept
+     exclusively as the accent (buttons, links, focus, active states) so
+     it never competes with the surface color underneath it. */
+  --color-navy-950: #0b0d12;
+  --color-navy-900: #12141a;
+  --color-navy-850: #171a21;
+  --color-navy-800: #1c1f27;
+  --color-navy-700: #262a34;
+  --color-navy-600: #313640;
+  --color-navy-500: #3d434f;
+  --color-navy-400: #4a5160;
 
-  /* Bluish grays — text / borders. Also mixes of only the official
-     colors: white for maximum contrast at the top, Support Lilac as the
-     exact secondary-text color, fading toward Deep Ink for the faintest
-     steps. Theme-flipped below for light mode. */
+  /* Neutral grays — text / borders. White at the top for primary text,
+     fading through neutral mid-grays with no blue/lilac tint, so body
+     copy and borders read as standard dark-mode gray rather than a
+     colored tint. Theme-flipped below for light mode. */
   --color-slate-50: #ffffff;
-  --color-slate-100: color-mix(in srgb, #ffffff 88%, var(--color-brand-lilac) 12%);
-  --color-slate-200: color-mix(in srgb, #ffffff 55%, var(--color-brand-lilac) 45%);
-  --color-slate-300: var(--color-brand-lilac);
-  --color-slate-400: color-mix(in srgb, var(--color-brand-lilac) 70%, var(--color-brand-ink) 30%);
-  --color-slate-500: color-mix(in srgb, var(--color-brand-lilac) 48%, var(--color-brand-ink) 52%);
-  --color-slate-600: color-mix(in srgb, var(--color-brand-lilac) 30%, var(--color-brand-ink) 70%);
-  --color-slate-700: color-mix(in srgb, var(--color-brand-lilac) 16%, var(--color-brand-ink) 84%);
+  --color-slate-100: #eef1f6;
+  --color-slate-200: #c6cbd4;
+  --color-slate-300: #9aa0ac;
+  --color-slate-400: #7c828f;
+  --color-slate-500: #656b78;
+  --color-slate-600: #4c515c;
+  --color-slate-700: #383c45;
 
   /* Generic overlay tint used for subtle borders/hover surfaces
-     (bg-ink/[x], border-ink/[x]) — Neutral Gray on dark, Deep Ink on light. */
-  --color-ink: var(--color-brand-gray);
+     (bg-ink/[x], border-ink/[x]) — pure white alpha on dark (the
+     conventional technique for elevation borders on near-black
+     surfaces), Deep Ink alpha on light. */
+  --color-ink: #ffffff;
 
   /* Fixed white for text/icons sitting on top of the NextLine Blue
      accent or filled accent shapes. Does NOT flip with the theme. */

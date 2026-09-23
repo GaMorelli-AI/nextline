@@ -88,6 +88,7 @@ export function CronogramaRico({ obra }: { obra: Obra }) {
   const [simulado, setSimulado] = useState(false);
   const [milestonesLocal, setMilestonesLocal] = useState<Milestone[]>(() => milestonesData.filter((m) => m.obraId === obra.id));
   const [novoMarco, setNovoMarco] = useState<{ nome: string; data: string; status: Milestone["status"] } | null>(null);
+  const [bufferDias, setBufferDias] = useState(() => obra.bufferDiasCliente ?? 0);
   const rulerRef = useRef<HTMLDivElement>(null);
 
   const tarefasObra = useMemo(() => {
@@ -103,10 +104,18 @@ export function CronogramaRico({ obra }: { obra: Obra }) {
 
   const tarefasVisiveis = useMemo(() => {
     let base = tarefasObra;
-    if (view === "cliente") base = base.filter((t) => t.visivelCliente);
+    if (view === "cliente") {
+      base = base
+        .filter((t) => t.visivelCliente)
+        .map((t) =>
+          bufferDias > 0
+            ? { ...t, inicio: formatDate(parseDate(t.inicio) + bufferDias * 86400000), fim: formatDate(parseDate(t.fim) + bufferDias * 86400000) }
+            : t
+        );
+    }
     if (view === "fornecedor") base = base.filter((t) => t.fornecedor === fornecedorEfetivo);
     return base;
-  }, [tarefasObra, view, fornecedorEfetivo]);
+  }, [tarefasObra, view, fornecedorEfetivo, bufferDias]);
 
   // Monta a árvore: pais primeiro, filhos logo abaixo (respeitando expandido)
   const linhas = useMemo(() => {
@@ -176,6 +185,20 @@ export function CronogramaRico({ obra }: { obra: Obra }) {
               </option>
             ))}
           </Select>
+        )}
+        {view !== "fornecedor" && (
+          <label className="flex shrink-0 items-center gap-2 text-[12.5px] text-slate-400">
+            Gordura para o cliente
+            <Input
+              type="number"
+              min={0}
+              max={90}
+              value={bufferDias}
+              onChange={(e) => setBufferDias(Math.max(0, Number(e.target.value) || 0))}
+              className="!h-8 !w-[72px] text-center"
+            />
+            dias
+          </label>
         )}
       </div>
 
@@ -362,7 +385,10 @@ export function CronogramaRico({ obra }: { obra: Obra }) {
           <Users2 className="h-3.5 w-3.5" /> Visão Interna: cronograma operacional completo
         </span>
         <span className="flex items-center gap-1.5">
-          <Building2 className="h-3.5 w-3.5" /> Visão Cliente: apenas o publicado, sem buffers internos
+          <Building2 className="h-3.5 w-3.5" />
+          {bufferDias > 0
+            ? `Visão Cliente: apenas o publicado, com ${bufferDias} dia${bufferDias > 1 ? "s" : ""} de folga sobre as datas internas`
+            : "Visão Cliente: apenas o publicado, sem folga adicional sobre as datas internas"}
         </span>
         <span className="flex items-center gap-1.5">
           <Truck className="h-3.5 w-3.5" /> Visão Fornecedor: somente as atividades daquele fornecedor

@@ -6,9 +6,9 @@ import { Badge } from "@/components/ui/Badge";
 import { SegmentedControl } from "@/components/ui/Tabs";
 import { Drawer } from "@/components/ui/Drawer";
 import { Button } from "@/components/ui/Button";
-import { Textarea } from "@/components/ui/Input";
+import { Select, Textarea } from "@/components/ui/Input";
 import { eventosAgenda } from "@/mocks/demoObra";
-import { getObraById } from "@/mocks/obras";
+import { obras, getObraById } from "@/mocks/obras";
 import type { EventoAgenda, StatusAgenda } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -29,19 +29,24 @@ const statusLabel: Record<StatusAgenda, string> = {
 };
 
 const views = [
+  { key: "obra", label: "Obra" },
   { key: "hoje", label: "Hoje" },
   { key: "semana", label: "Semana" },
   { key: "proximos", label: "Próximos" },
   { key: "aguardando", label: "Aguardando confirmação" },
 ];
 
+const obrasComEventos = obras.filter((o) => eventosAgenda.some((e) => e.obraId === o.id));
+
 export function AgendaPage() {
   const [view, setView] = useState("hoje");
+  const [obraFiltro, setObraFiltro] = useState(() => obrasComEventos[0]?.id ?? "");
   const [selected, setSelected] = useState<EventoAgenda | null>(null);
 
   const eventos = [...eventosAgenda].sort((a, b) => (a.data + a.horario).localeCompare(b.data + b.horario));
 
   const filtrados = eventos.filter((e) => {
+    if (view === "obra") return e.obraId === obraFiltro;
     if (view === "hoje") return e.data === "10/09/2026";
     if (view === "semana") return true;
     if (view === "proximos") return e.data > "10/09/2026";
@@ -62,7 +67,18 @@ export function AgendaPage() {
         subtitle="Visitas, medições, instalações e confirmações com fornecedores."
       />
 
-      <SegmentedControl options={views} active={view} onChange={setView} />
+      <div className="flex flex-wrap items-center gap-3">
+        <SegmentedControl options={views} active={view} onChange={setView} />
+        {view === "obra" && obrasComEventos.length > 0 && (
+          <Select value={obraFiltro} onChange={(e) => setObraFiltro(e.target.value)}>
+            {obrasComEventos.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.nome}
+              </option>
+            ))}
+          </Select>
+        )}
+      </div>
 
       <div className="space-y-6">
         {Object.entries(porDia).map(([data, eventosDoDia]) => (

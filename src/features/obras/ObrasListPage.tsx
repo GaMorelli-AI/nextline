@@ -14,7 +14,17 @@ import { Label, Input as TextInput, Select, Textarea } from "@/components/ui/Inp
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ObraCard } from "@/features/obras/ObraCard";
 import { obras } from "@/mocks/obras";
-import type { StatusObra } from "@/types";
+import { criarDadosBaseObra } from "@/mocks/obraTemplate";
+import type { Obra, StatusObra } from "@/types";
+
+function slugify(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
 
 const filters: { key: string; label: string }[] = [
   { key: "todas", label: "Todas" },
@@ -30,9 +40,77 @@ export function ObrasListPage() {
   const [view, setView] = useState<"cards" | "tabela">("cards");
   const [search, setSearch] = useState("");
   const [novaObraOpen, setNovaObraOpen] = useState(false);
+  const [obrasLocal, setObrasLocal] = useState(() => [...obras]);
+  const [novoNome, setNovoNome] = useState("");
+  const [novoCliente, setNovoCliente] = useState("");
+  const [novoContrato, setNovoContrato] = useState("");
+  const [novoResponsavel, setNovoResponsavel] = useState("");
+  const [novoPrazo, setNovoPrazo] = useState("");
+  const [novaDescricao, setNovaDescricao] = useState("");
+
+  function resetFormNovaObra() {
+    setNovoNome("");
+    setNovoCliente("");
+    setNovoContrato("");
+    setNovoResponsavel("");
+    setNovoPrazo("");
+    setNovaDescricao("");
+  }
+
+  function criarObra() {
+    if (!novoNome.trim()) return;
+    const base = slugify(novoNome);
+    const id = obras.some((o) => o.id === base) ? `${base}-${Date.now()}` : base || `obra-${Date.now()}`;
+    const hoje = new Date();
+    const prazoFormatado = novoPrazo
+      ? (() => {
+          const [y, m, d] = novoPrazo.split("-").map(Number);
+          return `${String(d).padStart(2, "0")}/${String(m).padStart(2, "0")}/${y}`;
+        })()
+      : "—";
+    const iniciais = novoResponsavel.trim()
+      ? novoResponsavel
+          .trim()
+          .split(" ")
+          .map((p) => p[0])
+          .slice(0, 2)
+          .join("")
+          .toUpperCase()
+      : "—";
+
+    const nova: Obra = {
+      id,
+      nome: novoNome.trim(),
+      cliente: novoCliente.trim() || "—",
+      contrato: novoContrato.trim() || "—",
+      progresso: 0,
+      progressoFinanceiro: 0,
+      status: "no-prazo",
+      prazo: prazoFormatado,
+      inicio: `${String(hoje.getDate()).padStart(2, "0")}/${String(hoje.getMonth() + 1).padStart(2, "0")}/${hoje.getFullYear()}`,
+      responsavel: novoResponsavel.trim() || "A definir",
+      responsavelAvatar: iniciais,
+      ncsAbertas: 0,
+      ultimoRdo: "—",
+      endereco: "",
+      unidade: "",
+      equipeHoje: 0,
+      pendencias: 0,
+      diasRestantes: 0,
+      descricao: novaDescricao.trim(),
+      valorContrato: 0,
+    };
+
+    obras.push(nova);
+    criarDadosBaseObra(id);
+    setObrasLocal([...obras]);
+    setNovaObraOpen(false);
+    resetFormNovaObra();
+    navigate(`/obras/${id}`);
+  }
 
   const filtered = useMemo(() => {
-    return obras.filter((o) => {
+    return obrasLocal.filter((o) => {
       const matchesFilter = filter === "todas" || o.status === (filter as StatusObra);
       const matchesSearch =
         !search ||
@@ -41,9 +119,9 @@ export function ObrasListPage() {
         o.responsavel.toLowerCase().includes(search.toLowerCase());
       return matchesFilter && matchesSearch;
     });
-  }, [filter, search]);
+  }, [obrasLocal, filter, search]);
 
-  const ativas = obras.filter((o) => o.status !== "concluido").length;
+  const ativas = obrasLocal.filter((o) => o.status !== "concluido").length;
 
   return (
     <div className="space-y-6">
@@ -142,14 +220,23 @@ export function ObrasListPage() {
 
       <Modal
         open={novaObraOpen}
-        onClose={() => setNovaObraOpen(false)}
+        onClose={() => {
+          setNovaObraOpen(false);
+          resetFormNovaObra();
+        }}
         title="Nova Obra"
         footer={
           <>
-            <Button variant="ghost" onClick={() => setNovaObraOpen(false)}>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setNovaObraOpen(false);
+                resetFormNovaObra();
+              }}
+            >
               Cancelar
             </Button>
-            <Button variant="primary" onClick={() => setNovaObraOpen(false)}>
+            <Button variant="primary" onClick={criarObra} disabled={!novoNome.trim()}>
               Criar Obra
             </Button>
           </>
@@ -158,19 +245,19 @@ export function ObrasListPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <Label>Nome da obra</Label>
-            <TextInput placeholder="Ex: Reforma Unidade Norte" />
+            <TextInput placeholder="Ex: Reforma Unidade Norte" value={novoNome} onChange={(e) => setNovoNome(e.target.value)} />
           </div>
           <div>
             <Label>Cliente</Label>
-            <TextInput placeholder="Ex: CONFEA" />
+            <TextInput placeholder="Ex: CONFEA" value={novoCliente} onChange={(e) => setNovoCliente(e.target.value)} />
           </div>
           <div>
             <Label>Contrato</Label>
-            <TextInput placeholder="Ex: 201/2026" />
+            <TextInput placeholder="Ex: 201/2026" value={novoContrato} onChange={(e) => setNovoContrato(e.target.value)} />
           </div>
           <div>
             <Label>Responsável técnico</Label>
-            <Select defaultValue="">
+            <Select value={novoResponsavel} onChange={(e) => setNovoResponsavel(e.target.value)}>
               <option value="" disabled>
                 Selecionar responsável
               </option>
@@ -182,11 +269,16 @@ export function ObrasListPage() {
           </div>
           <div>
             <Label>Prazo previsto</Label>
-            <TextInput type="date" />
+            <TextInput type="date" value={novoPrazo} onChange={(e) => setNovoPrazo(e.target.value)} />
           </div>
           <div className="sm:col-span-2">
             <Label>Descrição</Label>
-            <Textarea rows={3} placeholder="Escopo geral da obra..." />
+            <Textarea rows={3} placeholder="Escopo geral da obra..." value={novaDescricao} onChange={(e) => setNovaDescricao(e.target.value)} />
+          </div>
+          <div className="sm:col-span-2 rounded-[var(--radius-md)] bg-gradient-brand-soft p-3.5 text-[12px] text-slate-300">
+            A NextLine já cria automaticamente um modelo-base: etapas padrão de cronograma, marcos críticos, categorias de
+            projeto e checklist de documentos (ART/RRT/RT, contrato, memorial, liberação, seguro e laudos). Você pode remover
+            o que não se aplica ou acrescentar algo específico depois.
           </div>
         </div>
       </Modal>

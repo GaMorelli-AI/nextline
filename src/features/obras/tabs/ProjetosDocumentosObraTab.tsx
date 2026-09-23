@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { CheckCircle2, Sparkles, AlertTriangle, FileWarning, Layers } from "lucide-react";
+import { CheckCircle2, Sparkles, AlertTriangle, FileWarning, Layers, Plus } from "lucide-react";
 import { Card, CardHeader, CardBody } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { SegmentedControl } from "@/components/ui/Tabs";
 import { Drawer } from "@/components/ui/Drawer";
+import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { Input, Label, Select, Textarea } from "@/components/ui/Input";
 import { projetosRevisao, documentosObra } from "@/mocks/demoObra";
 import { DocumentosObraTab } from "@/features/obras/tabs/DocumentosObraTab";
 import type { DocumentoObra, Obra, ProjetoRevisao, StatusDocumentoObra } from "@/types";
@@ -31,13 +33,28 @@ const statusDocLabel: Record<StatusDocumentoObra, string> = {
 
 const grupoLabel = { imprescindivel: "Imprescindível", comum: "Comum", condicional: "Condicional" } as const;
 
+let nextRevisaoId = 1;
+
+interface NovaRevisaoForm {
+  categoria: string;
+  nome: string;
+  revisao: string;
+  resumoAlteracoes: string;
+  data: string;
+  responsavel: string;
+  aprovadoPor: string;
+  status: ProjetoRevisao["status"];
+}
+
 export function ProjetosDocumentosObraTab({ obra }: { obra: Obra }) {
   const [view, setView] = useState("projetos");
+  const [revisoesLocal, setRevisoesLocal] = useState<ProjetoRevisao[]>(() => projetosRevisao.filter((p) => p.obraId === obra.id));
   const [projSelected, setProjSelected] = useState<ProjetoRevisao | null>(null);
   const [docSelected, setDocSelected] = useState<DocumentoObra | null>(null);
   const [analisando, setAnalisando] = useState(false);
+  const [novaRevisao, setNovaRevisao] = useState<NovaRevisaoForm | null>(null);
 
-  const projetos = projetosRevisao.filter((p) => p.obraId === obra.id);
+  const projetos = revisoesLocal;
   const documentos = documentosObra.filter((d) => d.obraId === obra.id);
 
   const categorias = Array.from(new Set(projetos.map((p) => p.categoria)));
@@ -47,6 +64,53 @@ export function ProjetosDocumentosObraTab({ obra }: { obra: Obra }) {
     setDocSelected(doc);
     setAnalisando(true);
     setTimeout(() => setAnalisando(false), 900);
+  }
+
+  function abrirNovaRevisao(categoria?: string) {
+    const revisoesDaCategoria = categoria ? projetos.filter((p) => p.categoria === categoria) : [];
+    const maiorNumero = revisoesDaCategoria.reduce((max, r) => {
+      const n = parseInt(r.revisao.replace(/\D/g, ""), 10);
+      return Number.isFinite(n) ? Math.max(max, n) : max;
+    }, 0);
+    const proximoNumero = maiorNumero + 1;
+    setNovaRevisao({
+      categoria: categoria ?? "",
+      nome: revisoesDaCategoria[0]?.nome ?? "",
+      revisao: `REV ${String(proximoNumero).padStart(2, "0")}`,
+      resumoAlteracoes: "",
+      data: new Date().toLocaleDateString("pt-BR"),
+      responsavel: "",
+      aprovadoPor: "",
+      status: "em-revisao",
+    });
+  }
+
+  function salvarNovaRevisao() {
+    if (!novaRevisao) return;
+    if (!novaRevisao.categoria.trim() || !novaRevisao.nome.trim() || !novaRevisao.resumoAlteracoes.trim()) return;
+
+    const tornaVigente = novaRevisao.status === "aprovado";
+    const atualizadas = tornaVigente
+      ? revisoesLocal.map((r) => (r.categoria === novaRevisao.categoria && r.versaoVigente ? { ...r, versaoVigente: false, status: "substituido" as const } : r))
+      : revisoesLocal;
+
+    const nova: ProjetoRevisao = {
+      id: `proj-custom-${nextRevisaoId++}`,
+      obraId: obra.id,
+      categoria: novaRevisao.categoria.trim(),
+      nome: novaRevisao.nome.trim(),
+      revisao: novaRevisao.revisao.trim(),
+      versaoVigente: tornaVigente,
+      data: novaRevisao.data.trim(),
+      responsavel: novaRevisao.responsavel.trim() || "—",
+      aprovadoPor: novaRevisao.aprovadoPor.trim() || undefined,
+      status: novaRevisao.status,
+      resumoAlteracoes: novaRevisao.resumoAlteracoes.trim(),
+      origem: "nextline",
+    };
+
+    setRevisoesLocal([...atualizadas, nova]);
+    setNovaRevisao(null);
   }
 
   return (
@@ -61,6 +125,14 @@ export function ProjetosDocumentosObraTab({ obra }: { obra: Obra }) {
         onChange={setView}
       />
 
+      {view === "projetos" && (
+        <div className="flex justify-end">
+          <Button variant="outline" size="sm" icon={<Plus className="h-3.5 w-3.5" />} onClick={() => abrirNovaRevisao()}>
+            Adicionar
+          </Button>
+        </div>
+      )}
+
       {view === "projetos" &&
         (projetos.length === 0 ? (
           <EmptyState icon={<Layers className="h-6 w-6" />} title="Sem projetos cadastrados" description="Esta obra ainda não possui revisões de projeto no protótipo." />
@@ -71,7 +143,15 @@ export function ProjetosDocumentosObraTab({ obra }: { obra: Obra }) {
               const vigente = revisoes.find((r) => r.versaoVigente);
               return (
                 <Card key={cat}>
-                  <CardHeader title={`Projeto ${cat}`} subtitle={vigente ? `${vigente.revisao} · versão vigente` : "Sem versão vigente"} />
+                  <CardHeader
+                    title={`Projeto ${cat}`}
+                    subtitle={vigente ? `${vigente.revisao} · versão vigente` : "Sem versão vigente"}
+                    action={
+                      <Button variant="ghost" size="sm" icon={<Plus className="h-3.5 w-3.5" />} onClick={() => abrirNovaRevisao(cat)}>
+                        Nova revisão
+                      </Button>
+                    }
+                  />
                   <CardBody className="space-y-2.5">
                     {revisoes.map((r) => (
                       <button
@@ -140,7 +220,19 @@ export function ProjetosDocumentosObraTab({ obra }: { obra: Obra }) {
               <Badge tone="neutral">{projSelected.status}</Badge>
               <Badge tone="neutral">{projSelected.origem === "integracao-externa" ? "Integração externa" : "NextLine"}</Badge>
             </div>
+            {projSelected.resumoAlteracoes && (
+              <div className="rounded-[var(--radius-md)] bg-gradient-brand-soft p-3.5">
+                <p className="mb-1 text-[11.5px] font-semibold uppercase tracking-wider text-slate-500">
+                  Resumo das alterações desta revisão
+                </p>
+                <p className="text-[13px] text-slate-200">{projSelected.resumoAlteracoes}</p>
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-4 text-[13px]">
+              <div>
+                <p className="text-[11.5px] text-slate-500">Data</p>
+                <p className="mt-0.5 font-medium text-slate-200">{projSelected.data}</p>
+              </div>
               <div>
                 <p className="text-[11.5px] text-slate-500">Responsável</p>
                 <p className="mt-0.5 font-medium text-slate-200">{projSelected.responsavel}</p>
@@ -205,6 +297,81 @@ export function ProjetosDocumentosObraTab({ obra }: { obra: Obra }) {
           </div>
         )}
       </Drawer>
+
+      <Modal
+        open={!!novaRevisao}
+        onClose={() => setNovaRevisao(null)}
+        title="Nova revisão de projeto"
+        size="md"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setNovaRevisao(null)}>
+              Cancelar
+            </Button>
+            <Button
+              variant="primary"
+              onClick={salvarNovaRevisao}
+              disabled={!novaRevisao?.categoria.trim() || !novaRevisao?.nome.trim() || !novaRevisao?.resumoAlteracoes.trim()}
+            >
+              Adicionar revisão
+            </Button>
+          </>
+        }
+      >
+        {novaRevisao && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Categoria</Label>
+                <Input placeholder="Ex: Marcenaria" value={novaRevisao.categoria} onChange={(e) => setNovaRevisao({ ...novaRevisao, categoria: e.target.value })} />
+              </div>
+              <div>
+                <Label>Revisão</Label>
+                <Input placeholder="Ex: REV 05" value={novaRevisao.revisao} onChange={(e) => setNovaRevisao({ ...novaRevisao, revisao: e.target.value })} />
+              </div>
+            </div>
+            <div>
+              <Label>Nome do projeto</Label>
+              <Input placeholder="Ex: Projeto Marcenaria — Cozinha" value={novaRevisao.nome} onChange={(e) => setNovaRevisao({ ...novaRevisao, nome: e.target.value })} />
+            </div>
+            <div>
+              <Label>Resumo das alterações desta revisão *</Label>
+              <Textarea
+                rows={3}
+                placeholder="Ex: Alteração da bancada da cozinha e revisão das medidas da ilha."
+                value={novaRevisao.resumoAlteracoes}
+                onChange={(e) => setNovaRevisao({ ...novaRevisao, resumoAlteracoes: e.target.value })}
+                className={cn(!novaRevisao.resumoAlteracoes.trim() && "border-[var(--color-status-warn)]/40")}
+              />
+              <p className="mt-1 text-[11.5px] text-slate-500">
+                Obrigatório — explique o que mudou em relação à revisão anterior para quem for abrir este projeto depois.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Data</Label>
+                <Input placeholder="DD/MM/AAAA" value={novaRevisao.data} onChange={(e) => setNovaRevisao({ ...novaRevisao, data: e.target.value })} />
+              </div>
+              <div>
+                <Label>Responsável</Label>
+                <Input placeholder="Ex: Marcenaria Fortes" value={novaRevisao.responsavel} onChange={(e) => setNovaRevisao({ ...novaRevisao, responsavel: e.target.value })} />
+              </div>
+              <div>
+                <Label>Aprovado por</Label>
+                <Input placeholder="Ex: Fernanda Almeida" value={novaRevisao.aprovadoPor} onChange={(e) => setNovaRevisao({ ...novaRevisao, aprovadoPor: e.target.value })} />
+              </div>
+              <div>
+                <Label>Status</Label>
+                <Select value={novaRevisao.status} onChange={(e) => setNovaRevisao({ ...novaRevisao, status: e.target.value as ProjetoRevisao["status"] })}>
+                  <option value="em-revisao">Em revisão</option>
+                  <option value="aprovado">Aprovado (vira versão vigente)</option>
+                  <option value="substituido">Substituído</option>
+                </Select>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }
